@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cars</title>
+    <!--BOOTSTRAP CORE CSS-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+</head>
+<body>
+
+    <div id="container" class="col-xs-6 col-xs-offset-3">
+        <!--********************SEARCH DATABASE START********************-->
+        <div class="row">
+            <h2 class="page-header">Search our database</h2>
+            <input type="text" name="search" class="form-control" id="search" placeholder="Search our cars">
+            <h4 class="bg-info" id="result"><!--Search Results coming via AJAX--></h4>
+        </div>
+        <!--********************SEARCH DATABASE END********************-->
+        <br><br>
+        <!--********************ADD CAR START********************-->
+        <div class="row">
+            <form action="add_cars.php" method="post" id="add-car-form" class="col-xs-6">
+                <div class="form-group">
+                    <input type="text" name="car_name" class="form-control" placeholder="Add a car" required="true">
+                </div>
+                <div class="form-group">
+                    <input type="submit" class="btn btn-success" value="Add">
+                </div>
+            </form>
+            <div class="col-xs-6">
+                <div id="cars">
+
+                </div>
+            </div>
+        </div>
+        <!--********************ADD CAR END********************-->
+        <br><br>
+        <!--********************DISPLAYING START********************-->
+        <div class="row">
+            <div class="col-xs-6">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Car</th>
+                    </tr>
+                    </thead>
+                    <tbody id="show-cars">
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-xs-6">
+                <div id="feedback" class="alert alert-success">
+
+                </div>
+                <div id="action-container"></div>
+            </div>
+        </div>
+        <!--********************DISPLAYING END********************-->
+    </div>
+
+
+
+
+    <footer>
+        <!--JQUERY CORE-->
+        <script
+                src="https://code.jquery.com/jquery-3.1.1.min.js"
+                integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+                crossorigin="anonymous">
+        </script>
+        <!--BOOTSTRAP CORE JS-->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    </footer>
+
+    <script>
+        $(document).ready(function(){
+          //**********SEARCHING VIA AJAX**********//
+             $('#search').keyup(function(){  // Detecting the keyup event of the search input
+                 var search = $('#search').val();  // Like Trump, grabbing the value of the input :D :D :D
+                 $.ajax({
+                     url: 'search.php',  // Sending ajax request to the search.php file
+                     data: {search:search}, // sending keyword search with the variable search
+                     type: 'post',  // Type is post, can be get as well
+                     success: function(data){  // If the request is successful, passing data as a variable
+                         if (!data.error){
+                             $('#result').html(data);  // Place data into the div#result
+                         }
+                     }
+                 });
+             });
+
+            //**********ADDING TO DATABASE VIA AJAX**********//
+            $('#add-car-form').submit(function(evet) {  // Target the submitting of the form with jquery
+                evet.preventDefault();  // Prevent default submitting
+                var postData = $(this).serialize();  // Get all the data coming from the form
+                var url = $(this).attr('action');  // Url to the php file for processing
+                $.post(url, postData, function (car_data) {  // Via post pass url, data, and callback function
+                    $('#cars').html(car_data);  // Place it in the div with the id of cars
+                })
+                $('#add-car-form')[0].reset();  // Reset the form after adding
+            });
+
+            //**********SHOWING ALL. UPDATING CONSTANTLY EVERY X SECOND**********//
+            function readAndUpdateCars() {  // Show the table with jquery
+                $.ajax({  // Ajax request
+                    url: 'display_cars.php',  // Url to php file
+                    type: 'post',  // Request type
+                    success: function (show_cars_data) {  //On success parse data
+                        if (!show_cars_data.error){  // If there is no error
+                            $('#show-cars').html(show_cars_data)  // Place the response in div specified
+                        }
+                    }
+                });
+            }
+
+            // setInterval(function() {  // Update the function above every X Second
+                readAndUpdateCars()
+            // }, 1000)
+
+
+
+
+        }); // Main end
+    </script>
+
+</body>
+</html>
